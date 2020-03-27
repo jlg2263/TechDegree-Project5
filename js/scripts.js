@@ -7,19 +7,20 @@ FSJS Project 5 - Public API requests
  * GLOBAL VARIABLES FOR DOM ELEMENTS TO REFERENCE
  */
 const userUrl = 'https://randomuser.me/api/?results=12&inc=picture,name,email,location,cell,dob&nat=us';
-const body = document.getElementsByTagName('body');
+const body = document.querySelector('body');
 const searchDiv = document.querySelector('.search-container');
 const galleryDiv = document.querySelector('.gallery');
-let userStorage = '';
+let userStorage = [];
 
 /**
  * FETCH FUNCTIONS
  */
 // Call Fetch Data and call functions with given data/result/response
 fetchData(userUrl)
-    .then(data => getProfiles(data))
     .then(data => userData(data))
-    .then(data => generateSearch(data));
+    .then(data => getProfiles(data))
+    .then(data => generateSearch(data))
+    .then(data => cardListener(data));
 
 // Request data using fetch api
 function fetchData(url)
@@ -51,6 +52,14 @@ function checkStatus (response)
 /**
  * HELPER FUNCTIONS
  */
+// Store User Data for use by other functions to make more modular
+function userData(data)
+{   
+    // Populate array with data array
+    userStorage = data;
+    return data;
+}
+
 // Generate HTML for each user/profiles
 function getProfiles(data)
 {
@@ -63,7 +72,7 @@ function getProfiles(data)
         galleryDiv.appendChild(cardDiv);
         cardDiv.innerHTML = `
             <div class="card-img-container">
-                <img class="card-img" src=${user.picture.large} alt="profile picture">
+                <img class="card-img" src=${user.picture.medium} alt="profile picture">
             </div>
             <div class="card-info-container">
                 <h3 id="name" class="card-name cap">${user.name.first} ${user.name.last}</h3>
@@ -71,12 +80,6 @@ function getProfiles(data)
                 <p class="card-text cap">${user.location.city}, ${user.location.state}</p>
             </div>`;
     });
-}
-
-// Store User Data for use by other functions to make more modular
-function userData(data)
-{
-    return userStorage = data;
 }
 
 // Generate Search/Form HTML
@@ -93,24 +96,25 @@ function generateSearch()
 }
 
 // Generate Modal for user selected
-function generateModal(user)
+function generateModal(i, data)
 {
     // Create modal div html 
     const modalDiv = document.createElement('div');
-    let bday = data.results[user].dob.slice(0, 10);
+    let dob = data.results[i].dob.date;
+    let bday = dob.slice(0, 10);
     modalDiv.className = 'modal-container';
     modalDiv.innerHTML = `
         <div class="modal">
             <button type="button" id="modal-close-btn" class="modal-close-btn"><strong>X</strong></button>
             <div class="modal-info-container">
-                <img class="modal-img" src=${data.results[user].picture.large} alt="profile picture">
-                <h3 id="name" class="modal-name cap">${data.results[user].name.first} ${user.name.last}</h3>
-                <p class="modal-text">${data.results[user].email}</p>
-                <p class="modal-text cap">${data.results[user].location.city}</p>
+                <img class="modal-img" src=${data.results[i].picture.large} alt="profile picture">
+                <h3 id="name" class="modal-name cap">${data.results[i].name.first} ${data.results[i].name.last}</h3>
+                <p class="modal-text">${data.results[i].email}</p>
+                <p class="modal-text cap">${data.results[i].location.city}</p>
                 <hr>
-                <p class="modal-text">${data.results[user].cell}</p>
-                <p class="modal-text">${data.results[user].location.street.number} ${data.results[user].location.street.name}, ${data.results[user].location.city}, 
-                                      ${data.results[user].location.state} ${data.results[user].location.postcode}</p>
+                <p class="modal-text">${data.results[i].cell}</p>
+                <p class="modal-text">${data.results[i].location.street.number} ${data.results[i].location.street.name}, ${data.results[i].location.city}, 
+                                      ${data.results[i].location.state} ${data.results[i].location.postcode}</p>
                 <p class="modal-text">Birthday: ${bday}</p>
             </div>
         </div>
@@ -121,16 +125,13 @@ function generateModal(user)
             <button type="button" id="modal-next" class="modal-next btn">Next</button>
         </div>`
 
-    body[0].appendChild(modalDiv);
-};
+    body.appendChild(modalDiv);
 
-/**
- * GET DATA
- */
-//function searchData(e)
-//{
- //   e.preventDefault();
-//}
+    // Call functions for buttons on modal div
+    closeButton(modalDiv);
+    //nextButton();
+    //prevButton();
+};
 
 /**
  * EVENT LISTENERS
@@ -141,13 +142,31 @@ function cardListener()
     // Declare a DOM element for card div 
     const cardClicked = document.querySelectorAll('.card');
 
-    // Use a for of loop to traverse through array
-    for (let user of cardClicked)
+    // Use a for loop to traverse through array
+    for (let i = 0; i < cardClicked.length; i++)
     {
         // Add event listener when card is selected and call generateModal
-        cardClicked[user].addEventListener('click', (event) =>
+        cardClicked[i].addEventListener('click', (e) =>
         {
-            generateModal(user);
-        })
+            generateModal(i, userStorage);
+        });
     }
 }
+
+// Close/Exit Modal Listener to remove modal div
+function closeButton(modalDiv)
+{
+    // Declare a DOM element for exit/close button on modal div
+    closeBtn = document.getElementById('modal-close-btn');
+
+    closeBtn.addEventListener('click', (e) =>
+    {
+        modalDiv.remove();
+    });
+}
+        
+
+//function searchData(e)
+//{
+ //   e.preventDefault();
+//}
