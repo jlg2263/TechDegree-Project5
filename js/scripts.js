@@ -30,7 +30,7 @@ searchDiv.innerHTML += search;
 fetchData(userUrl)
     .then(data => userData(data))
     .then(data => getProfiles(data))
-    .then(data => cardListener(data))
+    .then(data => cardListener(data));
 
 // Request data using fetch api
 function fetchData(url)
@@ -134,23 +134,29 @@ function generateModal(i, data)
 // Search User function to show user entered
 const searchUser = (text, data) =>
 {  
-   // Set searchResults as an empty array 
-   let searchResults = [];
+    // Set searchResults as an empty array 
+    let searchResults = [];
 
-   // Use for loop to loop through user array to search 
-   for (let i = 0; i < data.results.length; i++)
-   {
-      // Declare local variables for search function & convert string to lowercase
-      const user = data.results[i];
-      const userName = user.name.first.toLowerCase();
-      
-      // If statement to pull results
-      if (text.length !== 0 && userName.includes(text.toLowerCase()))
-      {
-         searchResults.push(user);
-      }
-   }
-   return searchResults;
+    // Use for loop to loop through user array to search 
+    for (let i = 0; i < data.results.length; i++)
+    {
+        // Declare local variables for search function & convert string to lowercase
+        let user = data.results[i];
+        let firstName = user.name.first.toLowerCase();
+        let lastName = user.name.last.toLowerCase();
+        let userName = firstName + ' ' + lastName; 
+
+        // If statement to pull results
+        if (text.length !== 0 && userName.includes(text.toLowerCase()))
+        {
+            searchResults.push(user);
+        }
+        else
+        {
+
+        }
+    }
+    return searchResults;
 }
 
 
