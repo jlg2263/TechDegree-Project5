@@ -145,7 +145,6 @@ function generateModal(i, data)
     closeButton(modalDiv);
     nextButton(modalDiv, data);
     prevButton(modalDiv, data);
-
 };
 
 // Search User function to show user entered
