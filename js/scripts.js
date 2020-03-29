@@ -13,24 +13,19 @@ const galleryDiv = document.querySelector('.gallery');
 let user = 0;
 let userStorage = [];
 
-// Generate Search/Form HTML
-// Create form div html and append to search div
-const search = `
-    <form action="#" method="get">
-        <input type="search" id="search-input" class="search-input" placeholder="Search...">
-        <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
-    </form>`;
-
-searchDiv.innerHTML += search;
-
 /**
  * FETCH FUNCTIONS
  */
 // Call Fetch Data and call functions with given data/result/response
 fetchData(userUrl)
-    .then(data => userData(data))
-    .then(data => getProfiles(data))
-    .then(data => cardListener(data));
+    .then(data => 
+    {
+        userData(data);
+        getProfiles(data);
+        cardListener(data);
+        generateForm();
+    });
+    
 
 // Request data using fetch api
 function fetchData(url)
@@ -68,6 +63,22 @@ function userData(data)
     // Populate array with data array
     userStorage = data;
     return data;
+}
+
+// Generate Search/Form HTML
+function generateForm()
+{
+    // Create form div html and append to search div
+    const search = `
+        <form action="#" method="get">
+            <input type="search" id="search-input" class="search-input" placeholder="Search...">
+            <input type="submit" value="&#x1F50D;" id="search-submit" class="search-submit">
+        </form>`;
+
+    searchDiv.innerHTML += search;
+
+    // Call search for keyup event listener
+    generateSearch();
 }
 
 // Generate HTML for each user/profiles
@@ -132,33 +143,31 @@ function generateModal(i, data)
 };
 
 // Search User function to show user entered
-const searchUser = (text, data) =>
+const searchUser = (text) =>
 {  
-    // Set searchResults as an empty array 
-    let searchResults = [];
+    // From https://www.w3schools.com/howto/tryit.asp?filename=tryhow_js_filter_list
+    // Declare a local DOM element to traverse through
+    const cards = document.getElementsByClassName('card');
 
     // Use for loop to loop through user array to search 
-    for (let i = 0; i < data.results.length; i++)
+    for (let i = 0; i < cards.length; i++)
     {
-        // Declare local variables for search function & convert string to lowercase
-        let user = data.results[i];
-        let firstName = user.name.first.toLowerCase();
-        let lastName = user.name.last.toLowerCase();
-        let userName = firstName + ' ' + lastName; 
+        // Declare local variables for each user name
+        let userName = cards[i].getElementsByTagName('h3')[0];
+        let nameValue = userName.textContent || userName.innerText;
+        let counter = 0;
 
         // If statement to pull results
-        if (text.length !== 0 && userName.includes(text.toLowerCase()))
+        if (nameValue.toUpperCase().indexOf(text) > -1)
         {
-            searchResults.push(user);
+            cards[i].style.display = '';
         }
         else
         {
-
+            cards[i].style.display = 'none';
         }
     }
-    return searchResults;
 }
-
 
 /**
  * EVENT LISTENERS
@@ -234,38 +243,22 @@ function prevButton(modalDiv, data)
         }
     });
 }
-        
-// Search event handler for click to process user input
-searchDiv.addEventListener('click', (event) =>
-{
-    event.preventDefault();
-    let text = document.getElementById('search-input').value;
-
-    // Call search user
-    const numOfUserSearch = searchUser(text, userStorage);
     
-    if (numOfUserSearch.length !== 0)
-    {
-        getProfiles(numOfUserSearch);
-    }
-    else
-    {
-        getProfiles(userStorage);
-    }
-});
+// Search function for keyup event listener
+function generateSearch()
+{
+    // Declare DOM element for input and button in form
+    const searchInput = document.getElementById('search-input');
 
-// Search event handler for keyup
-// searchDiv.addEventListener('keyup', (event) =>
-// {  
-//     // Call search user
-//     const numOfUserSearch = searchUser(document.getElementById('search-input').value, userStorage);
+    // Search event handler for click to process user input
+    searchInput.addEventListener('keyup', (event) =>
+    {
+        event.preventDefault();
 
-//     if (numOfUserSearch.length !== 0)
-//     {
-//         generateModal(numOfUserSearch);
-//     }
-//     else
-//     {
-//         getProfiles(userStorage);
-//     }
-// });
+        // Convert user input to uppercase
+        let text = searchInput.value.toUpperCase();
+
+        // Call search user function
+        searchUser(text);
+    });
+}
