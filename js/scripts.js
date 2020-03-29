@@ -131,9 +131,15 @@ function generateModal(i, data)
         <div class="modal-btn-container">
             <button type="button" id="modal-prev" class="modal-prev btn">Prev</button>
             <button type="button" id="modal-next" class="modal-next btn">Next</button>
-        </div>`
+        </div>`;
 
     body.appendChild(modalDiv);
+
+    // CSS changes to background for current modal
+    const modalInfo = document.querySelector('.modal');
+    const modalButton = document.querySelector('.modal-btn-container');
+    modalInfo.style.backgroundColor = 'lightcyan';
+    modalButton.style.backgroundColor = 'lightcyan';
 
     // Call functions for buttons on modal div
     closeButton(modalDiv);
